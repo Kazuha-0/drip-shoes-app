@@ -1,0 +1,54 @@
+<div style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; max-width: 1300px; margin: 0 auto; padding: 40px 20px 80px 20px;">
+
+  <!-- Encabezado con título centrado y descripción -->
+  <div style="text-align: center; margin-bottom: 50px; border-bottom: 1px solid #f0f0f0; padding-bottom: 30px;">
+    <h1 style="font-family: 'Didot', 'Playfair Display', serif; font-size: 2.6rem; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 15px; color: #111;">
+      {{ infoCategorias[categoria]?.titulo }}
+    </h1>
+    <div style="width: 45px; height: 2px; background-color: #e50046; margin: 0 auto 20px auto;"></div>
+    <p style="color: #666; max-width: 750px; margin: 0 auto; line-height: 1.8; font-size: 1rem; font-weight: 300;">
+      {{ infoCategorias[categoria]?.descripcion }}
+    </p>
+  </div>
+
+  <!-- Cuadrícula de 4 Columnas (Estilo Bata Referencial) -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px;">
+    @for (item of productos; track item.id) {
+      <div style="background: #fff; padding: 15px; text-align: left; border: 1px solid #eaeaea; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
+
+        <!-- Contenedor Imagen -->
+        <div style="width: 100%; height: 260px; display: flex; align-items: center; justify-content: center; background-color: #fafafa; margin-bottom: 15px; overflow: hidden;">
+          <img [src]="item.imagen" [alt]="item.nombre" style="max-width: 90%; max-height: 90%; object-fit: contain;">
+        </div>
+
+        <!-- Detalles de producto -->
+        <div>
+          <span style="font-size: 11px; text-transform: uppercase; color: #888; font-weight: bold; letter-spacing: 1px;">
+            {{ item.marca }}
+          </span>
+          <h3 style="font-size: 14px; margin: 6px 0; color: #222; font-weight: 500; min-height: 38px;">
+            {{ item.nombre }}
+          </h3>
+          <p style="font-size: 12px; color: #777; margin: 0 0 10px 0; min-height: 34px; line-height: 1.4;">
+            {{ item.descripcion }}
+          </p>
+        </div>
+
+        <div>
+          <p style="font-size: 17px; font-weight: bold; color: #111; margin: 5px 0 15px 0;">
+            S/ {{ item.precio | number:'1.2-2' }}
+          </p>
+          <button style="width: 100%; padding: 12px; background: #000; color: #fff; border: none; font-size: 11px; font-weight: bold; letter-spacing: 1.5px; cursor: pointer; text-transform: uppercase;">
+            Ver Producto
+          </button>
+        </div>
+
+      </div>
+    } @empty {
+      <div style="grid-column: 1 / -1; text-align: center; padding: 80px 20px; color: #888;">
+        <p style="font-size: 1.1rem;">Cargando productos de la sección...</p>
+      </div>
+    }
+  </div>
+
+</div>

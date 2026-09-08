@@ -1,0 +1,81 @@
+<div style="font-family: 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;">
+  
+  <!-- SECCIÓN 1: INICIO (CARRUSEL AUTOMÁTICO) -->
+  <div id="inicio" class="carousel-container">
+    @for (slide of slides; track $index) {
+      <img [src]="slide" [class.active]="currentSlide === $index" class="carousel-slide" alt="Banner Drip Shoes">
+    }
+    <!-- Texto superpuesto transparente en el carrusel -->
+    <div class="carousel-overlay">
+      <h1 style="font-family: 'Didot', 'Playfair Display', 'Bodoni MT', serif; font-size: 3.5rem; margin-bottom: 15px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">DESCUBRE TU ESTILO</h1>
+      <p style="font-size: 1.2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); font-weight: 300; letter-spacing: 1px;">Las mejores marcas y diseños exclusivos de Drip Shoes.</p>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 2: CATÁLOGO Y DESCUBRE -->
+  <div id="catalogo" style="background-color: #fff; padding-top: 80px; scroll-margin-top: 80px;">
+    
+    <!-- Texto "DESCUBRE" con Tipografía Elegante de Alta Gama -->
+    <div style="text-align: center; padding: 0 20px 70px 20px;">
+      <h2 style="font-family: 'Didot', 'Playfair Display', 'Bodoni MT', 'Times New Roman', serif; font-size: 2.8rem; letter-spacing: 6px; margin-bottom: 25px; text-transform: uppercase; font-weight: normal; color: #111;">
+        Descubre
+      </h2>
+      
+      <!-- Línea decorativa sutil -->
+      <div style="width: 50px; height: 2px; background-color: #e50046; margin: 0 auto 35px auto;"></div>
+      
+      <!-- Descripción con mejor interlineado, fuente ligera y limpia -->
+      <p style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; color: #444; max-width: 800px; margin: 0 auto; line-height: 2; font-size: 1.15rem; font-weight: 300;">
+        <span style="font-family: 'Didot', 'Playfair Display', 'Bodoni MT', serif; font-style: italic; color: #000; font-size: 1.6rem; margin-bottom: 10px; display: inline-block;">Descubre tu próximo gran paso.</span><br>
+        Explora nuestra nueva colección, donde el confort absoluto se encuentra con el diseño en tendencia. Ya sea que busques elegancia atemporal para la oficina, frescura para tus fines de semana o la resistencia ideal para las aventuras de los más pequeños, tenemos el par perfecto esperando por ti. Encuentra el calzado que no solo se adapta a tus pies, sino a tu propio ritmo.
+      </p>
+    </div>
+
+    <!-- Las 3 Categorías Clickeables -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); height: 450px;">
+      <!-- Caballeros -->
+      <a routerLink="/categoria/caballeros" style="text-decoration: none; background-image: url('https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=800'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer;">
+        <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); transition: background 0.3s;"></div>
+        <h2 style="font-family: 'Montserrat', 'Helvetica Neue', sans-serif; color: white; font-size: 1.3rem; z-index: 1; text-transform: uppercase; font-weight: 400; letter-spacing: 3px;">Caballeros</h2>
+      </a>
+
+      <!-- Damas -->
+      <a routerLink="/categoria/damas" style="text-decoration: none; background-image: url('https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer;">
+        <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); transition: background 0.3s;"></div>
+        <h2 style="font-family: 'Montserrat', 'Helvetica Neue', sans-serif; color: white; font-size: 1.3rem; z-index: 1; text-transform: uppercase; font-weight: 400; letter-spacing: 3px;">Damas</h2>
+      </a>
+
+      <!-- Infantil -->
+      <a routerLink="/categoria/infantil" style="text-decoration: none; background-image: url('https://images.unsplash.com/photo-1514989940723-e8e51635b782?auto=format&fit=crop&w=800'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer;">
+        <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); transition: background 0.3s;"></div>
+        <h2 style="font-family: 'Montserrat', 'Helvetica Neue', sans-serif; color: white; font-size: 1.3rem; z-index: 1; text-transform: uppercase; font-weight: 400; letter-spacing: 3px;">Infantil</h2>
+      </a>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 3: POPULAR (Cuadrícula de la Base de Datos - 8 MAX) -->
+  <div id="popular" style="padding: 80px 40px; background: #fafafa; scroll-margin-top: 80px;">
+    <h2 style="font-family: 'Didot', 'Playfair Display', serif; margin-bottom: 40px; font-size: 2rem; text-align: left; font-weight: normal; color: #111;">Recomendados para ti</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px;">
+      
+      <!-- Mostramos solo los primeros 8 productos -->
+      @for (producto of productos | slice:0:8; track producto.id) {
+        <div style="background: #fff; padding: 20px; text-align: center; border: 1px solid #eee; transition: transform 0.2s;">
+          
+          <div style="width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+            <img [src]="producto.imagen || 'assets/placeholder.jpg'" alt="{{ producto.nombre }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+          </div>
+          
+          <p style="color: #888; font-size: 11px; margin: 0; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">{{ producto.marca }}</p>
+          <h3 style="font-size: 14px; margin: 8px 0; min-height: 40px; color: #222; font-weight: 400;">{{ producto.nombre }}</h3>
+          
+          <!-- Precio formateado con decimales premium -->
+          <p style="font-weight: bold; font-size: 17px; margin: 10px 0; color: #e50046;">S/ {{ producto.precio | number:'1.2-2' }}</p>
+        </div>
+      }
+      
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,33 @@
+<div style="padding: 20px; font-family: sans-serif; max-width: 800px; margin: auto;">
+  <h2 style="color: #333;">DRIP SHOES - Inventario</h2>
+  
+  <div style="background: #f4f4f4; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <input type="text" placeholder="Nombre (Ej: Air Max)" [(ngModel)]="nuevoZapato.nombre" style="margin-right: 10px; padding: 5px;">
+    <input type="text" placeholder="Marca (Ej: Nike)" [(ngModel)]="nuevoZapato.marca" style="margin-right: 10px; padding: 5px;">
+    <input type="number" placeholder="Precio" [(ngModel)]="nuevoZapato.precio" style="margin-right: 10px; padding: 5px;">
+    <button (click)="agregarZapato()" style="padding: 6px 15px; background: #000; color: #fff; border: none; cursor: pointer;">Guardar</button>
+  </div>
+
+  <table style="width: 100%; border-collapse: collapse; text-align: left;">
+    <thead>
+      <tr style="background: #000; color: #fff;">
+        <th style="padding: 10px; border: 1px solid #ddd;">ID</th>
+        <th style="padding: 10px; border: 1px solid #ddd;">Nombre</th>
+        <th style="padding: 10px; border: 1px solid #ddd;">Marca</th>
+        <th style="padding: 10px; border: 1px solid #ddd;">Precio</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (producto of productos; track producto.id) {
+        <tr>
+          <td style="padding: 10px; border: 1px solid #ddd;">{{ producto.id }}</td>
+          <td style="padding: 10px; border: 1px solid #ddd;">{{ producto.nombre }}</td>
+          <td style="padding: 10px; border: 1px solid #ddd;">{{ producto.marca }}</td>
+          <td style="padding: 10px; border: 1px solid #ddd;">S/ {{ producto.precio }}</td>
+        </tr>
+      } @empty {
+        <tr><td colspan="4" style="padding: 10px; text-align: center; border: 1px solid #ddd;">No hay zapatos registrados.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,9 @@
+/* Activa el deslizamiento suave en toda la página web */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
