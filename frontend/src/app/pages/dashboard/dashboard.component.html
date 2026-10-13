@@ -1,0 +1,115 @@
+<!-- PANTALLA DE LOGIN -->
+<div class="login-wrapper" *ngIf="!isLoggedIn">
+  <div class="login-card">
+    <h2>Drip Shoes - Admin</h2>
+    <p>Ingresa para administrar</p>
+    
+    <div class="input-group">
+      <label>Usuario</label>
+      <input type="text" [(ngModel)]="loginUser" placeholder="Ej: admin123">
+    </div>
+    
+    <div class="input-group">
+      <label>Contraseña</label>
+      <input type="password" [(ngModel)]="loginPass">
+    </div>
+
+    <p class="error" *ngIf="loginError">{{ loginError }}</p>
+    
+    <button class="btn-login" (click)="onLogin()">Ingresar</button>
+  </div>
+</div>
+
+<!-- PANEL DEL DASHBOARD -->
+<div class="dashboard-container" *ngIf="isLoggedIn">
+  <header>
+    <h1>Panel de Administración</h1>
+    <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>
+  </header>
+
+  <div class="reports-section">
+    <div class="report-card">
+      <h4>Total de Zapatillas en Catálogo</h4>
+      <p class="report-value">{{ totalProducts }}</p>
+    </div>
+  </div>
+
+  <div class="crud-section">
+    <!-- FORMULARIO -->
+    <div class="form-card" style="width: 35%;">
+      <h3>{{ isEditing ? 'Editar' : 'Nuevo' }} Producto</h3>
+      
+      <label>Marca</label>
+      <input type="text" placeholder="Ej: Nike, Adidas..." [(ngModel)]="currentProduct.marca">
+
+      <label>Nombre del Modelo</label>
+      <input type="text" placeholder="Ej: Air Force 1" [(ngModel)]="currentProduct.nombre">
+      
+      <label>Precio</label>
+      <input type="number" placeholder="Ej: 299.90" [(ngModel)]="currentProduct.precio">
+      
+      <label>Categoría</label>
+      <select [(ngModel)]="currentProduct.categoria" style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc;">
+        <option value="">Selecciona...</option>
+        <option value="Caballeros">Caballeros</option>
+        <option value="Damas">Damas</option>
+        <option value="Niños">Niños</option>
+      </select>
+      
+      <label>Descripción</label>
+      <textarea placeholder="Descripción del producto..." [(ngModel)]="currentProduct.descripcion" rows="3" style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc;"></textarea>
+      
+      <label>Imagen de la Zapatilla</label>
+      <input type="file" id="fileUpload" accept="image/*" (change)="onFileSelected($event)" style="margin-bottom: 10px; width: 100%;">
+      
+      <!-- Previsualización -->
+      <div *ngIf="currentProduct.imagen" style="text-align: center; margin: 10px 0;">
+        <img [src]="currentProduct.imagen" alt="Preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+      </div>
+      
+      <button class="btn-save" (click)="saveProduct()">Guardar en BD</button>
+      <button class="btn-cancel" *ngIf="isEditing" (click)="resetForm()" style="margin-top: 5px;">Cancelar</button>
+    </div>
+
+    <!-- TABLA DE INVENTARIO -->
+    <div class="table-card" style="width: 65%; overflow-x: auto;">
+      <h3>Inventario Supabase</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Imagen</th>
+            <th>Marca</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Agregamos un efecto de opacidad al 50% si el producto está oculto -->
+          <tr *ngFor="let p of products" [ngStyle]="{'opacity': p.visible === false ? '0.5' : '1'}">
+            <td>
+              <img *ngIf="p.imagen" [src]="p.imagen" alt="Foto" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+              <span *ngIf="!p.imagen" style="color: #999; font-size: 0.8rem;">Sin foto</span>
+            </td>
+            <td>{{ p.marca }}</td>
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.categoria }}</td>
+            <td>S/ {{ p.precio }}</td>
+            <td>
+              <!-- BOTÓN OCULTAR / MOSTRAR -->
+              <button 
+                (click)="toggleVisibility(p)" 
+                [ngStyle]="{'background-color': p.visible === false ? '#4caf50' : '#ff9800', 'color': 'white', 'border': 'none', 'padding': '5px 10px', 'border-radius': '4px', 'margin-right': '5px', 'cursor': 'pointer'}">
+                {{ p.visible === false ? 'Mostrar' : 'Ocultar' }}
+              </button>
+
+              <button class="btn-edit" (click)="editProduct(p)" style="margin-right: 5px;">Editar</button>
+              <button class="btn-delete" (click)="deleteProduct(p.id)">Borrar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

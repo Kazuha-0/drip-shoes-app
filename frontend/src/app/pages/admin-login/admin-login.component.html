@@ -1,0 +1,22 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <h2>Drip Shoes - Admin</h2>
+    <p>Ingresa tus credenciales para administrar</p>
+    
+    <form (ngSubmit)="onLogin()">
+      <div class="input-group">
+        <label>Usuario</label>
+        <input type="text" name="username" [(ngModel)]="username" required>
+      </div>
+      
+      <div class="input-group">
+        <label>Contraseña</label>
+        <input type="password" name="password" [(ngModel)]="password" required>
+      </div>
+
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      
+      <button type="submit" class="btn-login">Ingresar al Dashboard</button>
+    </form>
+  </div>
+</div>

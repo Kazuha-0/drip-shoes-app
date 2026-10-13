@@ -19,4 +19,7 @@ public class Product {
     private String descripcion;
     private String categoria; // "Caballeros", "Damas" o "Infantil"
     private String imagen;    // URL de la imagen del producto
+
+    // NUEVO CAMPO: Para ocultar/mostrar productos desde el Dashboard
+    private Boolean visible = true;
 }

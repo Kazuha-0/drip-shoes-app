@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { CommonModule } from '@angular/common'; // <-- 1. Importar CommonModule
+import { CommonModule } from '@angular/common'; 
 import { Product } from '../../services/product.service';
 
 interface CategoryInfo {
@@ -12,7 +12,7 @@ interface CategoryInfo {
 @Component({
   selector: 'app-category-detail',
   standalone: true,
-  imports: [CommonModule], // <-- 2. Añadirlo a la lista de imports
+  imports: [CommonModule], 
   templateUrl: './category-detail.component.html'
 })
 export class CategoryDetailComponent implements OnInit {
@@ -47,7 +47,8 @@ export class CategoryDetailComponent implements OnInit {
 
   cargarProductos(tipo: string) {
     this.http.get<Product[]>(`http://localhost:8080/api/productos?categoria=${tipo}`).subscribe({
-      next: (data) => this.productos = data,
+      // AQUÍ ESTÁ EL FILTRO: Solo guardamos los productos que NO tengan visible en false
+      next: (data) => this.productos = data.filter((producto: any) => producto.visible !== false),
       error: (err) => console.error('Error al filtrar productos:', err)
     });
   }

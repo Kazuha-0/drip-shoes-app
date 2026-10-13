@@ -8,10 +8,10 @@ import { ProductService, Product } from '../../services/product.service';
   templateUrl: './catalog.component.html'
 })
 export class CatalogComponent implements OnInit {
-  
+
   // 1. Inyección del servicio de conexión con Spring Boot
   private productService = inject(ProductService);
-  
+
   // 2. Arreglo vacío que la cuadrícula HTML llenará con las fotos y datos
   productos: Product[] = [];
 
@@ -24,7 +24,8 @@ export class CatalogComponent implements OnInit {
     // Llama al método GET del servicio y se suscribe a la respuesta de Spring Boot
     this.productService.getProductos().subscribe({
       next: (data) => {
-        this.productos = data; // Guarda los datos de Supabase en la variable local
+        // AQUÍ ESTÁ LA MAGIA: Filtramos para ignorar los que tienen visible en false
+        this.productos = data.filter((producto: any) => producto.visible !== false);
       },
       error: (err) => {
         console.error('Error al cargar el catálogo:', err);
