@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { HttpClient } from '@angular/common/http';
+import { Product } from '../../services/product.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,24 +12,21 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  // === ¡IMPORTANTE! Reemplaza esto con tus datos reales de Supabase ===
-  private supabaseUrl = 'https://qnzbrdnujtfysngmtlqf.supabase.co'; 
-  private supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuemJyZG51anRmeXNuZ210bHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3ODgxODQsImV4cCI6MjEwNDM2NDE4NH0.vB1-fY3KXctqVb8uGTN0v1gnYNBQfAUZCAN7i7ezffE'; // <--- ¡PEGA TU CLAVE AQUÍ!
-  private supabase: SupabaseClient;
+  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:8080/api/productos';
 
   isLoggedIn = false;
   loginUser = ''; 
   loginPass = '';
   loginError = '';
 
-  products: any[] = [];
-  currentProduct: any = { id: null, marca: '', nombre: '', precio: 0, categoria: '', descripcion: '', imagen: '', visible: true };
+  products: Product[] = [];
+  currentProduct: Product = { id: 0, marca: '', nombre: '', precio: 0, categoria: '', descripcion: '', imagen: '', visible: true };
   isEditing = false;
   totalProducts = 0;
 
-  constructor() {
-    this.supabase = createClient(this.supabaseUrl, this.supabaseKey);
-  }
+  // Variable para capturar lo que el usuario escribe en el buscador
+  terminoBusqueda: string = '';
 
   ngOnInit() {
     if (localStorage.getItem('adminLogueado') === 'true') {
@@ -55,21 +53,29 @@ export class DashboardComponent implements OnInit {
     this.loginPass = '';
   }
 
-  async loadProducts() {
-    const { data, error } = await this.supabase
-      .from('productos')
-      .select('*')
-      .order('id', { ascending: true });
+  loadProducts() {
+    this.http.get<Product[]>(this.apiUrl).subscribe({
+      next: (data) => {
+        this.products = data;
+        this.totalProducts = this.products.length;
+      },
+      error: (err) => alert('Error al cargar productos: ' + err.message)
+    });
+  }
 
-    if (error) {
-      alert('Error al cargar productos: ' + error.message);
+  // ¡AQUÍ ESTÁ LA FUNCIÓN QUE FALTABA!
+  buscarProducto() {
+    if (!this.terminoBusqueda.trim()) {
+      this.loadProducts(); // Si el buscador está vacío, recarga toda la lista
       return;
     }
-
-    if (data) {
-      this.products = data;
-      this.totalProducts = this.products.length;
-    }
+    this.http.get<Product[]>(`${this.apiUrl}/buscar?termino=${this.terminoBusqueda}`).subscribe({
+      next: (data) => {
+        this.products = data;
+        this.totalProducts = this.products.length;
+      },
+      error: (err) => alert('Error en la búsqueda: ' + err.message)
+    });
   }
 
   onFileSelected(event: any) {
@@ -83,87 +89,56 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  async saveProduct() {
+  saveProduct() {
     if (!this.currentProduct.nombre || !this.currentProduct.categoria) {
       alert('Por favor, llena al menos el nombre y la categoría.');
       return;
     }
 
-    let resultError = null;
-
     if (this.isEditing) {
-      const { error } = await this.supabase
-        .from('productos')
-        .update({ 
-          marca: this.currentProduct.marca,
-          nombre: this.currentProduct.nombre, 
-          precio: this.currentProduct.precio, 
-          categoria: this.currentProduct.categoria,
-          descripcion: this.currentProduct.descripcion,
-          imagen: this.currentProduct.imagen,
-          visible: this.currentProduct.visible
-        })
-        .eq('id', this.currentProduct.id);
-      resultError = error;
+      this.http.put<Product>(`${this.apiUrl}/${this.currentProduct.id}`, this.currentProduct).subscribe({
+        next: () => {
+          alert('¡Zapatilla actualizada con éxito!');
+          this.resetForm();
+          this.loadProducts();
+        },
+        error: (err) => alert('Error al actualizar: ' + err.message)
+      });
     } else {
-      const { error } = await this.supabase
-        .from('productos')
-        .insert([{ 
-          marca: this.currentProduct.marca,
-          nombre: this.currentProduct.nombre, 
-          precio: this.currentProduct.precio, 
-          categoria: this.currentProduct.categoria,
-          descripcion: this.currentProduct.descripcion,
-          imagen: this.currentProduct.imagen,
-          visible: true
-        }]);
-      resultError = error;
-    }
-    
-    if (resultError) {
-      alert('HUBO UN ERROR EN LA BASE DE DATOS:\n' + resultError.message);
-      console.error(resultError);
-    } else {
-      alert('¡Zapatilla guardada con éxito en Supabase!');
-      this.resetForm();
-      await this.loadProducts();
+      this.http.post<Product>(this.apiUrl, this.currentProduct).subscribe({
+        next: () => {
+          alert('¡Zapatilla guardada con éxito!');
+          this.resetForm();
+          this.loadProducts();
+        },
+        error: (err) => alert('Error al guardar: ' + err.message)
+      });
     }
   }
 
-  editProduct(product: any) {
+  editProduct(product: Product) {
     this.currentProduct = { ...product };
     this.isEditing = true;
   }
 
-  async deleteProduct(id: number) {
-    if (confirm('¿Eliminar zapatilla de Supabase?')) {
-      const { error } = await this.supabase.from('productos').delete().eq('id', id);
-      if (error) {
-        alert('Error al eliminar: ' + error.message);
-      } else {
-        await this.loadProducts();
-      }
+  deleteProduct(id: any) {
+    if (confirm('¿Eliminar zapatilla?')) {
+      this.http.delete(`${this.apiUrl}/${id}`).subscribe({
+        next: () => this.loadProducts(),
+        error: (err) => alert('Error al eliminar: ' + err.message)
+      });
     }
   }
 
-  // Lógica para Ocultar / Mostrar
-  async toggleVisibility(producto: any) {
-    const nuevoEstado = producto.visible === false ? true : false; 
-
-    const { error } = await this.supabase
-      .from('productos')
-      .update({ visible: nuevoEstado })
-      .eq('id', producto.id);
-
-    if (error) {
-      alert('Error al cambiar la visibilidad: ' + error.message);
-    } else {
-      await this.loadProducts(); 
-    }
+  toggleVisibility(producto: Product) {
+    this.http.put<Product>(`${this.apiUrl}/${producto.id}/toggle`, {}).subscribe({
+      next: () => this.loadProducts(),
+      error: (err) => alert('Error al cambiar la visibilidad: ' + err.message)
+    });
   }
 
   resetForm() {
-    this.currentProduct = { id: null, marca: '', nombre: '', precio: 0, categoria: '', descripcion: '', imagen: '', visible: true };
+    this.currentProduct = { id: 0, marca: '', nombre: '', precio: 0, categoria: '', descripcion: '', imagen: '', visible: true };
     this.isEditing = false;
     const fileInput = document.getElementById('fileUpload') as HTMLInputElement;
     if(fileInput) fileInput.value = '';

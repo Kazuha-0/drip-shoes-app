@@ -9,6 +9,7 @@ export interface Product {
   descripcion?: string;
   categoria?: string;
   imagen?: string;
+  visible?: boolean; // <-- AGREGA SOLO ESTA LÍNEA AQUÍ
 }
 
 @Injectable({ providedIn: 'root' })

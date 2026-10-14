@@ -1,115 +1,103 @@
 <!-- PANTALLA DE LOGIN -->
-<div class="login-wrapper" *ngIf="!isLoggedIn">
-  <div class="login-card">
-    <h2>Drip Shoes - Admin</h2>
-    <p>Ingresa para administrar</p>
-    
-    <div class="input-group">
-      <label>Usuario</label>
-      <input type="text" [(ngModel)]="loginUser" placeholder="Ej: admin123">
-    </div>
-    
-    <div class="input-group">
-      <label>Contraseña</label>
-      <input type="password" [(ngModel)]="loginPass">
-    </div>
-
-    <p class="error" *ngIf="loginError">{{ loginError }}</p>
-    
-    <button class="btn-login" (click)="onLogin()">Ingresar</button>
+<div *ngIf="!isLoggedIn" class="login-container" style="max-width: 400px; margin: 50px auto; text-align: center;">
+  <h2>Acceso Administrativo</h2>
+  <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+    <input type="text" [(ngModel)]="loginUser" placeholder="Usuario" style="padding: 10px;">
+    <input type="password" [(ngModel)]="loginPass" placeholder="Contraseña" style="padding: 10px;">
+    <button (click)="onLogin()" style="padding: 10px; background-color: #e6004c; color: white; border: none; cursor: pointer;">Ingresar</button>
+    <p *ngIf="loginError" style="color: red;">{{ loginError }}</p>
   </div>
 </div>
 
-<!-- PANEL DEL DASHBOARD -->
-<div class="dashboard-container" *ngIf="isLoggedIn">
-  <header>
-    <h1>Panel de Administración</h1>
-    <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>
-  </header>
-
-  <div class="reports-section">
-    <div class="report-card">
-      <h4>Total de Zapatillas en Catálogo</h4>
-      <p class="report-value">{{ totalProducts }}</p>
-    </div>
+<!-- PANEL DASHBOARD -->
+<div *ngIf="isLoggedIn" class="dashboard-container" style="padding: 20px;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>Panel de Administración ({{ totalProducts }} productos)</h2>
+    <button (click)="logout()" style="padding: 8px 15px; background-color: #333; color: white; border: none; cursor: pointer;">Cerrar Sesión</button>
   </div>
 
-  <div class="crud-section">
-    <!-- FORMULARIO -->
-    <div class="form-card" style="width: 35%;">
-      <h3>{{ isEditing ? 'Editar' : 'Nuevo' }} Producto</h3>
-      
-      <label>Marca</label>
-      <input type="text" placeholder="Ej: Nike, Adidas..." [(ngModel)]="currentProduct.marca">
-
-      <label>Nombre del Modelo</label>
-      <input type="text" placeholder="Ej: Air Force 1" [(ngModel)]="currentProduct.nombre">
-      
-      <label>Precio</label>
-      <input type="number" placeholder="Ej: 299.90" [(ngModel)]="currentProduct.precio">
-      
-      <label>Categoría</label>
-      <select [(ngModel)]="currentProduct.categoria" style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc;">
-        <option value="">Selecciona...</option>
-        <option value="Caballeros">Caballeros</option>
-        <option value="Damas">Damas</option>
-        <option value="Niños">Niños</option>
+  <!-- FORMULARIO DE PRODUCTO -->
+  <div class="form-card" style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+    <h3>{{ isEditing ? 'Editar Producto' : 'Nuevo Producto' }}</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+      <input type="text" [(ngModel)]="currentProduct.marca" placeholder="Marca (ej. Nike)" style="padding: 8px;">
+      <input type="text" [(ngModel)]="currentProduct.nombre" placeholder="Nombre (ej. Air Force 1)" style="padding: 8px;">
+      <input type="number" [(ngModel)]="currentProduct.precio" placeholder="Precio (S/)" style="padding: 8px;">
+      <select [(ngModel)]="currentProduct.categoria" style="padding: 8px;">
+        <option value="">Selecciona Categoría</option>
+        <option value="caballeros">Caballeros</option>
+        <option value="damas">Damas</option>
+        <option value="infantil">Infantil</option>
       </select>
-      
-      <label>Descripción</label>
-      <textarea placeholder="Descripción del producto..." [(ngModel)]="currentProduct.descripcion" rows="3" style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ccc;"></textarea>
-      
-      <label>Imagen de la Zapatilla</label>
-      <input type="file" id="fileUpload" accept="image/*" (change)="onFileSelected($event)" style="margin-bottom: 10px; width: 100%;">
-      
-      <!-- Previsualización -->
-      <div *ngIf="currentProduct.imagen" style="text-align: center; margin: 10px 0;">
-        <img [src]="currentProduct.imagen" alt="Preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+      <input type="text" [(ngModel)]="currentProduct.descripcion" placeholder="Descripción breve" style="padding: 8px; grid-column: span 2;">
+      <div style="grid-column: span 2;">
+        <label>Imagen Local:</label>
+        <input type="file" id="fileUpload" (change)="onFileSelected($event)" accept="image/*" style="display: block; margin-top: 5px;">
       </div>
-      
-      <button class="btn-save" (click)="saveProduct()">Guardar en BD</button>
-      <button class="btn-cancel" *ngIf="isEditing" (click)="resetForm()" style="margin-top: 5px;">Cancelar</button>
     </div>
-
-    <!-- TABLA DE INVENTARIO -->
-    <div class="table-card" style="width: 65%; overflow-x: auto;">
-      <h3>Inventario Supabase</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Imagen</th>
-            <th>Marca</th>
-            <th>Nombre</th>
-            <th>Categoría</th>
-            <th>Precio</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Agregamos un efecto de opacidad al 50% si el producto está oculto -->
-          <tr *ngFor="let p of products" [ngStyle]="{'opacity': p.visible === false ? '0.5' : '1'}">
-            <td>
-              <img *ngIf="p.imagen" [src]="p.imagen" alt="Foto" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-              <span *ngIf="!p.imagen" style="color: #999; font-size: 0.8rem;">Sin foto</span>
-            </td>
-            <td>{{ p.marca }}</td>
-            <td>{{ p.nombre }}</td>
-            <td>{{ p.categoria }}</td>
-            <td>S/ {{ p.precio }}</td>
-            <td>
-              <!-- BOTÓN OCULTAR / MOSTRAR -->
-              <button 
-                (click)="toggleVisibility(p)" 
-                [ngStyle]="{'background-color': p.visible === false ? '#4caf50' : '#ff9800', 'color': 'white', 'border': 'none', 'padding': '5px 10px', 'border-radius': '4px', 'margin-right': '5px', 'cursor': 'pointer'}">
-                {{ p.visible === false ? 'Mostrar' : 'Ocultar' }}
-              </button>
-
-              <button class="btn-edit" (click)="editProduct(p)" style="margin-right: 5px;">Editar</button>
-              <button class="btn-delete" (click)="deleteProduct(p.id)">Borrar</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div style="margin-top: 15px; display: flex; gap: 10px;">
+      <button (click)="saveProduct()" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer;">
+        {{ isEditing ? 'Actualizar' : 'Guardar' }}
+      </button>
+      <button *ngIf="isEditing" (click)="resetForm()" style="padding: 10px 20px; background-color: #6c757d; color: white; border: none; cursor: pointer;">
+        Cancelar
+      </button>
     </div>
   </div>
+
+  <!-- BARRA DE BÚSQUEDA Y TABLA -->
+  <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+    <input 
+      type="text" 
+      [(ngModel)]="terminoBusqueda" 
+      (ngModelChange)="buscarProducto()" 
+      placeholder="Escribe para buscar en tiempo real..." 
+      style="padding: 10px; width: 300px; border-radius: 4px; border: 1px solid #ccc;"
+    >
+  </div>
+
+  <table style="width: 100%; border-collapse: collapse; text-align: left;">
+    <thead>
+      <tr style="border-bottom: 2px solid #ccc;">
+        <th style="padding: 10px;">Imagen</th>
+        <th style="padding: 10px;">Marca</th>
+        <th style="padding: 10px;">Nombre</th>
+        <th style="padding: 10px;">Categoría</th>
+        <th style="padding: 10px;">Precio</th>
+        <th style="padding: 10px;">Estado</th>
+        <th style="padding: 10px;">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of products" style="border-bottom: 1px solid #eee;">
+        <td style="padding: 10px;">
+          <img [src]="p.imagen" alt="Img" width="50" style="border-radius: 4px;" *ngIf="p.imagen">
+        </td>
+        <td style="padding: 10px;">{{ p.marca }}</td>
+        <td style="padding: 10px;">{{ p.nombre }}</td>
+        <td style="padding: 10px;">{{ p.categoria }}</td>
+        <td style="padding: 10px;">S/ {{ p.precio }}</td>
+        <td style="padding: 10px;">
+          <span [style.color]="p.visible ? 'green' : 'red'">
+            {{ p.visible ? 'Público' : 'Oculto' }}
+          </span>
+        </td>
+        <td style="padding: 10px; display: flex; gap: 5px; align-items: center; height: 100%;">
+          <button (click)="toggleVisibility(p)" style="padding: 5px 10px; background-color: #fd7e14; color: white; border: none; border-radius: 3px; cursor: pointer;">
+            {{ p.visible ? 'Ocultar' : 'Mostrar' }}
+          </button>
+          <button (click)="editProduct(p)" style="padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;">
+            Editar
+          </button>
+          <button (click)="deleteProduct(p.id)" style="padding: 5px 10px; background-color: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;">
+            Borrar
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="products.length === 0">
+        <td colspan="7" style="text-align: center; padding: 20px;">No se encontraron productos.</td>
+      </tr>
+    </tbody>
+  </table>
 </div>

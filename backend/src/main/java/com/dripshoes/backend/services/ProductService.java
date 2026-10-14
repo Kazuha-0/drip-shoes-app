@@ -33,7 +33,10 @@ public class ProductService {
     }
 
     public List<Product> obtenerPorCategoria(String categoria) {
-    return productRepository.findByCategoriaIgnoreCase(categoria);
+   return productRepository.findVisibleByCategoryJPQL(categoria);
 }
+public List<Product> buscarZapatillas(String termino) {
+        return productRepository.buscarPorNombreOMarcaJPQL(termino);
+    }
 
 }
