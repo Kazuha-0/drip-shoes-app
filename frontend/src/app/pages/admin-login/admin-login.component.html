@@ -1,22 +1,89 @@
 <div class="login-wrapper">
   <div class="login-card">
-    <h2>Drip Shoes - Admin</h2>
-    <p>Ingresa tus credenciales para administrar</p>
-    
-    <form (ngSubmit)="onLogin()">
-      <div class="input-group">
-        <label>Usuario</label>
-        <input type="text" name="username" [(ngModel)]="username" required>
-      </div>
-      
-      <div class="input-group">
-        <label>Contraseña</label>
-        <input type="password" name="password" [(ngModel)]="password" required>
-      </div>
 
-      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-      
-      <button type="submit" class="btn-login">Ingresar al Dashboard</button>
-    </form>
+    <!-- ================= MODO LOGIN (SIGN IN) ================= -->
+    <ng-container *ngIf="!isRegisterMode">
+      <h2 class="title">Sign in</h2>
+      <p class="subtitle">
+        Not registered? 
+        <a href="javascript:void(0)" (click)="toggleMode()">Click here to register.</a>
+      </p>
+
+      <form (ngSubmit)="onLogin()">
+        <!-- Campo Usuario / Email -->
+        <div class="pill-input">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <input type="text" name="username" [(ngModel)]="username" placeholder="Username or Email" required>
+        </div>
+
+        <!-- Campo Contraseña -->
+        <div class="pill-input">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="7.5" cy="15.5" r="5.5"></circle>
+            <path d="m21 2-9.6 9.6"></path>
+            <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
+          </svg>
+          <input type="password" name="password" [(ngModel)]="password" placeholder="Password" required>
+        </div>
+
+        <!-- Opciones: Remember Me y Forgot Password -->
+        <div class="options-row">
+          <label class="remember-me">
+            <input type="checkbox" name="rememberMe" [(ngModel)]="rememberMe">
+            <span>Remember Me</span>
+          </label>
+          <a href="javascript:void(0)" class="forgot-link">Forgot Password?</a>
+        </div>
+
+        <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+        <p class="success-msg" *ngIf="successMessage">{{ successMessage }}</p>
+
+        <button type="submit" class="btn-submit">Sign in</button>
+      </form>
+    </ng-container>
+
+    <!-- ================= MODO REGISTRO (SIGN UP) ================= -->
+    <ng-container *ngIf="isRegisterMode">
+      <h2 class="title">Register</h2>
+      <p class="subtitle">
+        Already have an account? 
+        <a href="javascript:void(0)" (click)="toggleMode()">Click here to sign in.</a>
+      </p>
+
+      <form (ngSubmit)="onRegister()">
+        <div class="row-2-cols">
+          <div class="pill-input">
+            <input type="text" name="nombre" [(ngModel)]="regData.nombre" placeholder="First Name" required>
+          </div>
+          <div class="pill-input">
+            <input type="text" name="apellido" [(ngModel)]="regData.apellido" placeholder="Last Name" required>
+          </div>
+        </div>
+
+        <div class="pill-input">
+          <input type="text" name="usuario" [(ngModel)]="regData.usuario" placeholder="Username" required>
+        </div>
+
+        <div class="pill-input">
+          <input type="email" name="email" [(ngModel)]="regData.email" placeholder="Email Address" required>
+        </div>
+
+        <div class="pill-input">
+          <input type="text" name="celular" [(ngModel)]="regData.celular" placeholder="Phone Number" required>
+        </div>
+
+        <div class="pill-input">
+          <input type="password" name="regPassword" [(ngModel)]="regData.password" placeholder="Password" required>
+        </div>
+
+        <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+        <button type="submit" class="btn-submit">Register</button>
+      </form>
+    </ng-container>
+
   </div>
 </div>

@@ -1,47 +1,51 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdminService {
+  private http = inject(HttpClient);
+  private authUrl = 'http://localhost:8080/api/auth';
   private storageKey = 'drip_shoes_products';
 
-  constructor() {
-    // Inicializar con datos de prueba si está vacío
-    if (!localStorage.getItem(this.storageKey)) {
-      const initialProducts = [
-        { id: 1, name: 'Nike Air Force 1', price: 120, stock: 15 },
-        { id: 2, name: 'Adidas Forum Low', price: 100, stock: 8 }
-      ];
-      localStorage.setItem(this.storageKey, JSON.stringify(initialProducts));
-    }
+  constructor() {}
+
+  // --- LOGIN CON JWT ---
+  login(username: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.authUrl}/login`, { username, password }).pipe(
+      tap(response => {
+        localStorage.setItem('jwt_token', response.token);
+        localStorage.setItem('roles', JSON.stringify(response.roles));
+        localStorage.setItem('isAdmin', response.roles.includes('ROLE_ADMIN') ? 'true' : 'false');
+      })
+    );
   }
 
-  // --- LOGIN MOCK ---
-  login(user: string, pass: string): boolean {
-    if (user === 'admin' && pass === 'admin123') {
-      localStorage.setItem('isAdmin', 'true');
-      return true;
-    }
-    return false;
+  // --- REGISTRO EN BASE DE DATOS SUPABASE ---
+  register(datosUsuario: any): Observable<any> {
+    return this.http.post<any>(`${this.authUrl}/register`, datosUsuario);
   }
 
   logout() {
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('roles');
     localStorage.removeItem('isAdmin');
   }
 
   isLoggedIn(): boolean {
-    return localStorage.getItem('isAdmin') === 'true';
+    return !!localStorage.getItem('jwt_token');
   }
 
-  // --- CRUD DE PRODUCTOS ---
+  // --- CRUD DE PRODUCTOS EXISTENTE ---
   getProducts() {
     return JSON.parse(localStorage.getItem(this.storageKey) || '[]');
   }
 
   addProduct(product: any) {
     const products = this.getProducts();
-    product.id = new Date().getTime(); // Generar ID único simulado
+    product.id = new Date().getTime();
     products.push(product);
     localStorage.setItem(this.storageKey, JSON.stringify(products));
   }
