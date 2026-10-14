@@ -1,16 +1,5 @@
-<!-- PANTALLA DE LOGIN -->
-<div *ngIf="!isLoggedIn" class="login-container" style="max-width: 400px; margin: 50px auto; text-align: center;">
-  <h2>Acceso Administrativo</h2>
-  <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
-    <input type="text" [(ngModel)]="loginUser" placeholder="Usuario" style="padding: 10px;">
-    <input type="password" [(ngModel)]="loginPass" placeholder="Contraseña" style="padding: 10px;">
-    <button (click)="onLogin()" style="padding: 10px; background-color: #e6004c; color: white; border: none; cursor: pointer;">Ingresar</button>
-    <p *ngIf="loginError" style="color: red;">{{ loginError }}</p>
-  </div>
-</div>
-
 <!-- PANEL DASHBOARD -->
-<div *ngIf="isLoggedIn" class="dashboard-container" style="padding: 20px;">
+<div class="dashboard-container" style="padding: 20px;">
   
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h2>Panel de Administración ({{ totalProducts }} productos)</h2>

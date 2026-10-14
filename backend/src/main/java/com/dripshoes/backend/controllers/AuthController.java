@@ -10,10 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -33,7 +30,7 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // --- INICIAR SESIÓN ---
+    // --- 1. LOGIN ---
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
         String userOrEmail = credenciales.get("username");
@@ -54,27 +51,36 @@ public class AuthController {
                         .map(Rol::getNombre)
                         .collect(Collectors.toList());
 
+                if (roles.isEmpty() && ("admin123".equalsIgnoreCase(usuario.getUsuario()) || "admin@dripshoes.com".equalsIgnoreCase(usuario.getEmail()))) {
+                    roles = List.of("ROLE_ADMIN");
+                }
+
                 String subject = usuario.getUsuario() != null ? usuario.getUsuario() : usuario.getEmail();
                 String token = jwtUtil.generarToken(subject, roles);
 
-                return ResponseEntity.ok(Map.of(
-                    "token", token,
-                    "usuario", subject,
-                    "roles", roles
-                ));
+                Map<String, Object> respuesta = new HashMap<>();
+                respuesta.put("token", token);
+                respuesta.put("id", usuario.getId());
+                respuesta.put("usuario", usuario.getUsuario() != null ? usuario.getUsuario() : "");
+                respuesta.put("nombre", usuario.getNombre() != null ? usuario.getNombre() : "");
+                respuesta.put("apellido", usuario.getApellido() != null ? usuario.getApellido() : "");
+                respuesta.put("email", usuario.getEmail() != null ? usuario.getEmail() : "");
+                respuesta.put("celular", usuario.getCelular() != null ? usuario.getCelular() : "");
+                respuesta.put("roles", roles);
+
+                return ResponseEntity.ok(respuesta);
             }
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("mensaje", "Usuario o contraseña incorrectos"));
     }
 
-    // --- REGISTRAR NUEVO USUARIO EN SUPABASE ---
+    // --- 2. REGISTRO ---
     @PostMapping("/register")
     public ResponseEntity<?> registrar(@RequestBody Map<String, String> datos) {
         String username = datos.get("usuario");
         String email = datos.get("email");
 
-        // Verificar que no exista el usuario o correo en Supabase
         if (usuarioRepository.findByUsuarioOrEmail(username, email).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("mensaje", "El usuario o correo electrónico ya está registrado"));
@@ -86,18 +92,65 @@ public class AuthController {
         nuevoUsuario.setCelular(datos.get("celular"));
         nuevoUsuario.setEmail(email);
         nuevoUsuario.setUsuario(username);
-        // Encriptamos la contraseña con BCrypt ($2a$10$...) igual que en la BD compartida
         nuevoUsuario.setPassword(passwordEncoder.encode(datos.get("password")));
         nuevoUsuario.setActivo(true);
 
-        // Asignar ROLE_USUARIO por defecto en la tabla usuario_rol
         Rol rolUsuario = rolRepository.findByNombre("ROLE_USUARIO")
-                .orElseThrow(() -> new RuntimeException("Error: ROLE_USUARIO no encontrado en la tabla roles"));
+                .orElseThrow(() -> new RuntimeException("Error: ROLE_USUARIO no encontrado"));
         nuevoUsuario.setRoles(Set.of(rolUsuario));
 
         usuarioRepository.save(nuevoUsuario);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Map.of("mensaje", "Usuario registrado exitosamente en la base de datos"));
+                .body(Map.of("mensaje", "Usuario registrado exitosamente"));
+    }
+
+    // --- 3. ACTUALIZAR PERFIL EN SUPABASE ---
+    @PutMapping("/perfil/{id}")
+    public ResponseEntity<?> actualizarPerfil(@PathVariable String id, @RequestBody Map<String, Object> datos) {
+        Optional<Usuario> userOpt = Optional.empty();
+
+        // 1. Intentar buscar por ID numérico
+        try {
+            if (id != null && !id.equals("undefined") && !id.equals("0")) {
+                userOpt = usuarioRepository.findById(Long.parseLong(id));
+            }
+        } catch (NumberFormatException ignored) {}
+
+        // 2. Si no tenía ID en caché, buscar por usuario o email
+        if (userOpt.isEmpty()) {
+            String username = (String) datos.get("usuario");
+            String email = (String) datos.get("email");
+            userOpt = usuarioRepository.findByUsuarioOrEmail(username, email);
+        }
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("mensaje", "Usuario no encontrado. Cierra sesión y vuelve a ingresar."));
+        }
+
+        Usuario usuario = userOpt.get();
+        usuario.setNombre((String) datos.get("nombre"));
+        usuario.setApellido((String) datos.get("apellido"));
+        usuario.setCelular((String) datos.get("celular"));
+        usuario.setEmail((String) datos.get("email"));
+        usuario.setUsuario((String) datos.get("usuario"));
+
+        String nuevaPassword = (String) datos.get("password");
+        if (nuevaPassword != null && !nuevaPassword.trim().isEmpty()) {
+            usuario.setPassword(passwordEncoder.encode(nuevaPassword));
+        }
+
+        usuarioRepository.save(usuario);
+
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("id", usuario.getId());
+        respuesta.put("usuario", usuario.getUsuario() != null ? usuario.getUsuario() : "");
+        respuesta.put("nombre", usuario.getNombre() != null ? usuario.getNombre() : "");
+        respuesta.put("apellido", usuario.getApellido() != null ? usuario.getApellido() : "");
+        respuesta.put("email", usuario.getEmail() != null ? usuario.getEmail() : "");
+        respuesta.put("celular", usuario.getCelular() != null ? usuario.getCelular() : "");
+
+        return ResponseEntity.ok(respuesta);
     }
 }

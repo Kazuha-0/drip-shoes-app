@@ -2,13 +2,59 @@
   <div>
     <img src="assets/logo Drip Shoes.png" alt="Drip Shoes Logo" style="height: 50px; cursor: pointer;" routerLink="/">
   </div>
-  <ul style="display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; font-family: sans-serif; font-weight: bold; font-size: 14px;">
+
+  <ul style="display: flex; align-items: center; gap: 30px; list-style: none; margin: 0; padding: 0; font-family: sans-serif; font-weight: bold; font-size: 14px;">
     <li><a routerLink="/" fragment="inicio" style="color: #fff; text-decoration: none; cursor: pointer;">INICIO</a></li>
     <li><a routerLink="/" fragment="catalogo" style="color: #fff; text-decoration: none; cursor: pointer;">CATALOGO</a></li>
     <li><a routerLink="/" fragment="popular" style="color: #fff; text-decoration: none; cursor: pointer;">POPULAR</a></li>
     <li><a routerLink="/nosotros" style="color: #fff; text-decoration: none; cursor: pointer;">NOSOTROS</a></li>
     <li><a routerLink="/contacto" style="color: #fff; text-decoration: none; cursor: pointer;">CONTACTANOS</a></li>
-  <!-- Cambia routerLink="/login" por routerLink="/dashboard" -->
-<a routerLink="/dashboard" style="color: #ff007f; font-weight: bold; margin-left: 15px;">ADMIN</a>
+
+    <!-- ZONA DE ICONOS: USUARIO Y CARRITO -->
+    <li style="display: flex; align-items: center; gap: 22px; margin-left: 10px;">
+
+      <!-- 1. SI NO HA INICIADO SESIÓN: Muestra el icono de personita que lleva a /login -->
+      <a *ngIf="!adminService.isLoggedIn()" routerLink="/login" title="Iniciar Sesión" style="color: #fff; display: flex; align-items: center; cursor: pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </a>
+
+      <!-- 2. SI YA INICIÓ SESIÓN: Muestra Icono + Nombre y Apellido + Desplegable -->
+      <div *ngIf="adminService.isLoggedIn()" style="position: relative;">
+        <div (click)="toggleDropdown()" style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #fff; user-select: none; padding: 6px 12px; border-radius: 20px; background: #1a1a1a;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff007f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>{{ adminService.getCurrentUser()?.nombre }} {{ adminService.getCurrentUser()?.apellido }}</span>
+          <span style="font-size: 10px; color: #aaa;">▼</span>
+        </div>
+
+        <!-- Menú desplegable -->
+        <div *ngIf="dropdownOpen" style="position: absolute; right: 0; top: 44px; background: #fff; color: #333; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); width: 175px; overflow: hidden; z-index: 2000; font-weight: normal;">
+          <a routerLink="/perfil" (click)="closeDropdown()" style="display: block; padding: 12px 16px; color: #222; text-decoration: none; border-bottom: 1px solid #eee; font-size: 14px;">
+            👤 Mi Perfil
+          </a>
+          <a *ngIf="adminService.isAdmin()" routerLink="/dashboard" (click)="closeDropdown()" style="display: block; padding: 12px 16px; color: #157efb; text-decoration: none; border-bottom: 1px solid #eee; font-size: 14px; font-weight: 600;">
+            ⚙️ Dashboard
+          </a>
+          <a href="javascript:void(0)" (click)="logout()" style="display: block; padding: 12px 16px; color: #e53935; text-decoration: none; font-size: 14px;">
+            🚪 Cerrar sesión
+          </a>
+        </div>
+      </div>
+
+      <!-- 3. ICONO DE CARRITO DE COMPRAS (Decorativo por ahora) -->
+      <a href="javascript:void(0)" title="Carrito de compras" style="color: #fff; display: flex; align-items: center; cursor: pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+      </a>
+
+    </li>
   </ul>
 </nav>

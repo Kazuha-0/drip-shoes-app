@@ -2,7 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Product } from '../../services/product.service';
+import { AdminService } from '../../services/admin.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,12 +15,9 @@ import { Product } from '../../services/product.service';
 })
 export class DashboardComponent implements OnInit {
   private http = inject(HttpClient);
+  private adminService = inject(AdminService);
+  private router = inject(Router);
   private apiUrl = 'http://localhost:8080/api/productos';
-
-  isLoggedIn = false;
-  loginUser = ''; 
-  loginPass = '';
-  loginError = '';
 
   products: Product[] = [];
   currentProduct: Product = { id: 0, marca: '', nombre: '', precio: 0, categoria: '', descripcion: '', imagen: '', visible: true };
@@ -29,28 +28,17 @@ export class DashboardComponent implements OnInit {
   terminoBusqueda: string = '';
 
   ngOnInit() {
-    if (localStorage.getItem('adminLogueado') === 'true') {
-      this.isLoggedIn = true;
-      this.loadProducts();
+    // Verifica que tenga sesión activa con JWT y que posea el rol ROLE_ADMIN
+    if (!this.adminService.isLoggedIn() || !this.adminService.isAdmin()) {
+      this.router.navigate(['/login']);
+      return;
     }
-  }
-
-  onLogin() {
-    if (this.loginUser === 'admin123' && this.loginPass === 'admin159') {
-      this.isLoggedIn = true;
-      localStorage.setItem('adminLogueado', 'true');
-      this.loginError = '';
-      this.loadProducts();
-    } else {
-      this.loginError = 'Usuario o contraseña incorrectos';
-    }
+    this.loadProducts();
   }
 
   logout() {
-    this.isLoggedIn = false;
-    localStorage.removeItem('adminLogueado');
-    this.loginUser = '';
-    this.loginPass = '';
+    this.adminService.logout();
+    this.router.navigate(['/login']);
   }
 
   loadProducts() {
@@ -63,10 +51,9 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  // ¡AQUÍ ESTÁ LA FUNCIÓN QUE FALTABA!
   buscarProducto() {
     if (!this.terminoBusqueda.trim()) {
-      this.loadProducts(); // Si el buscador está vacío, recarga toda la lista
+      this.loadProducts();
       return;
     }
     this.http.get<Product[]>(`${this.apiUrl}/buscar?termino=${this.terminoBusqueda}`).subscribe({
@@ -105,7 +92,9 @@ export class DashboardComponent implements OnInit {
         error: (err) => alert('Error al actualizar: ' + err.message)
       });
     } else {
-      this.http.post<Product>(this.apiUrl, this.currentProduct).subscribe({
+      // Creamos una copia sin el id: 0 para que PostgreSQL/Supabase autogenere el ID correctamente
+      const { id, ...nuevoProducto } = this.currentProduct;
+      this.http.post<Product>(this.apiUrl, nuevoProducto).subscribe({
         next: () => {
           alert('¡Zapatilla guardada con éxito!');
           this.resetForm();
@@ -141,6 +130,6 @@ export class DashboardComponent implements OnInit {
     this.currentProduct = { id: 0, marca: '', nombre: '', precio: 0, categoria: '', descripcion: '', imagen: '', visible: true };
     this.isEditing = false;
     const fileInput = document.getElementById('fileUpload') as HTMLInputElement;
-    if(fileInput) fileInput.value = '';
+    if (fileInput) fileInput.value = '';
   }
 }

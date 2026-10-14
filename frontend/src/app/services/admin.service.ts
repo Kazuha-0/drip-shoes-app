@@ -12,26 +12,58 @@ export class AdminService {
 
   constructor() {}
 
-  // --- LOGIN CON JWT ---
+  // --- LOGIN ---
   login(username: string, password: string): Observable<any> {
     return this.http.post<any>(`${this.authUrl}/login`, { username, password }).pipe(
       tap(response => {
         localStorage.setItem('jwt_token', response.token);
         localStorage.setItem('roles', JSON.stringify(response.roles));
         localStorage.setItem('isAdmin', response.roles.includes('ROLE_ADMIN') ? 'true' : 'false');
+        localStorage.setItem('currentUser', JSON.stringify({
+          id: response.id,
+          usuario: response.usuario,
+          nombre: response.nombre,
+          apellido: response.apellido,
+          email: response.email,
+          celular: response.celular,
+          roles: response.roles
+        }));
       })
     );
   }
 
-  // --- REGISTRO EN BASE DE DATOS SUPABASE ---
+  // --- REGISTRO ---
   register(datosUsuario: any): Observable<any> {
     return this.http.post<any>(`${this.authUrl}/register`, datosUsuario);
+  }
+
+  // --- ACTUALIZAR PERFIL ---
+  actualizarPerfil(id: number, datos: any): Observable<any> {
+    return this.http.put<any>(`${this.authUrl}/perfil/${id}`, datos).pipe(
+      tap(updatedUser => {
+        const actual = this.getCurrentUser();
+        localStorage.setItem('currentUser', JSON.stringify({
+          ...actual,
+          ...updatedUser
+        }));
+      })
+    );
+  }
+
+  getCurrentUser(): any {
+    const userStr = localStorage.getItem('currentUser');
+    return userStr ? JSON.parse(userStr) : null;
+  }
+
+  isAdmin(): boolean {
+    return localStorage.getItem('isAdmin') === 'true';
   }
 
   logout() {
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('roles');
     localStorage.removeItem('isAdmin');
+    localStorage.removeItem('currentUser');
   }
 
   isLoggedIn(): boolean {
