@@ -1,18 +1,20 @@
+/// <reference types="jasmine" />
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CategoryDetailComponent } from './category-detail.component';
+import { CartComponent } from './cart.component';
 
-describe('CategoryDetailComponent', () => {
-  let component: CategoryDetailComponent;
-  let fixture: ComponentFixture<CategoryDetailComponent>;
+describe('CartComponent', () => {
+  let component: CartComponent;
+  let fixture: ComponentFixture<CartComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CategoryDetailComponent]
+      imports: [CartComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(CategoryDetailComponent);
+    fixture = TestBed.createComponent(CartComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

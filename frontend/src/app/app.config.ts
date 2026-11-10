@@ -1,18 +1,12 @@
 import { ApplicationConfig } from '@angular/core';
-import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http'; // <- ESTO ES VITAL PARA TU BACKEND
+
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { authInterceptor } from './auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(
-      routes, 
-      withInMemoryScrolling({
-        scrollPositionRestoration: 'top',
-        anchorScrolling: 'enabled'
-      })
-    ),
-    provideHttpClient(withInterceptors([authInterceptor]))
+    provideRouter(routes),
+    provideHttpClient() // <- SIN ESTO LA PANTALLA SE QUEDA EN BLANCO
   ]
 };

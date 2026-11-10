@@ -4,6 +4,9 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common'; 
 import { Product } from '../../services/product.service';
 
+// 1. AGREGADO: Importamos tu servicio de carrito global
+import { CartService } from '../../services/cart.service';
+
 interface CategoryInfo {
   titulo: string;
   descripcion: string;
@@ -18,6 +21,9 @@ interface CategoryInfo {
 export class CategoryDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
+  
+  // 2. AGREGADO: Inyectamos el servicio global para poder usarlo
+  private cartService = inject(CartService);
 
   categoria: string = '';
   productos: Product[] = [];
@@ -51,5 +57,22 @@ export class CategoryDetailComponent implements OnInit {
       next: (data) => this.productos = data.filter((producto: any) => producto.visible !== false),
       error: (err) => console.error('Error al filtrar productos:', err)
     });
+  }
+  
+  carrito: any[] = []; 
+
+  agregarAlCarrito(producto: any) {
+    // 3. AGREGADO: Enviamos el producto a la memoria global para que la boleta lo pueda recibir
+    this.cartService.addToCart(producto);
+
+    // Mantuve tu lógica local exactamente igual por si la necesitas para otra cosa
+    let itemExistente = this.carrito.find(item => item.producto.id === producto.id);
+    if (itemExistente) {
+      itemExistente.cantidad++;
+    } else {
+      this.carrito.push({ producto: producto, cantidad: 1 });
+    }
+    
+    alert(`¡${producto.nombre} agregado al carrito! Da clic en el ícono superior para ver tu compra.`);
   }
 }

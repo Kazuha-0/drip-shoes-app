@@ -1,0 +1,84 @@
+<div style="padding: 40px; max-width: 900px; margin: auto; font-family: 'Montserrat', sans-serif;">
+  
+  <!-- SI EL CARRITO ESTÁ VACÍO -->
+  <div *ngIf="cartService.getItems().length === 0" style="text-align: center; padding: 50px;">
+    <h2>Tu carrito está vacío 🛒</h2>
+    <p style="color: #666; margin-top: 10px;">¡Regresa al catálogo y agrega unas zapatillas!</p>
+  </div>
+
+  <!-- SI HAY PRODUCTOS, MOSTRAMOS LA BOLETA -->
+  <div *ngIf="cartService.getItems().length > 0" style="display: flex; flex-direction: column; align-items: center;">
+    <h2 style="margin-bottom: 30px; font-weight: bold;">Simulación de Compra</h2>
+    
+    <div style="border: 1px solid #ccc; padding: 30px; background: #fff; width: 100%; max-width: 650px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <h3 style="text-align: center; color: #e50046; margin: 0 0 5px 0; font-size: 22px;">DRIP SHOES S.A.C.</h3>
+      <p style="text-align: center; font-size: 12px; color: #666; margin-bottom: 20px;">BOLETA DE VENTA ELECTRÓNICA</p>
+      
+      <table style="width: 100%; text-align: left; font-size: 14px; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 2px solid #ddd;">
+            <th style="padding-bottom: 10px; width: 60px;">Imagen</th>
+            <th style="padding-bottom: 10px;">Producto</th>
+            <th style="padding-bottom: 10px; text-align: center;">Cant.</th>
+            <th style="padding-bottom: 10px; text-align: right;">Subtotal</th>
+            <th style="padding-bottom: 10px; text-align: center; width: 40px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Recorrido de los productos del backend -->
+          <tr *ngFor="let item of cartService.getItems()" style="border-bottom: 1px solid #eee;">
+            
+            <td style="padding: 10px 0;">
+              <!-- Se asume que la BD devuelve la propiedad "imagen" -->
+              <img [src]="item.producto.imagen" alt="Zapatilla" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; border: 1px solid #eaeaea;">
+            </td>
+            
+            <td style="padding: 10px 0;">
+              <span style="font-weight: bold; color: #333;">{{ item.producto.nombre }}</span><br>
+              <span style="font-size: 11px; color: #888;">S/ {{ item.producto.precio | number:'1.2-2' }} c/u</span>
+            </td>
+            
+            <!-- Controles de Cantidad -->
+            <td style="padding: 10px 0; text-align: center;">
+              <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <button (click)="disminuir(item.producto.id, item.cantidad)" style="border: 1px solid #ddd; background: #f9f9f9; padding: 2px 8px; cursor: pointer; border-radius: 4px; font-weight: bold;">-</button>
+                <span style="min-width: 15px; font-weight: 500;">{{ item.cantidad }}</span>
+                <button (click)="aumentar(item.producto.id)" style="border: 1px solid #ddd; background: #f9f9f9; padding: 2px 8px; cursor: pointer; border-radius: 4px; font-weight: bold;">+</button>
+              </div>
+            </td>
+
+            <!-- Cálculo de Subtotal por Item -->
+            <td style="padding: 10px 0; text-align: right; font-weight: 500; color: #111;">S/ {{ item.producto.precio * item.cantidad | number:'1.2-2' }}</td>
+            
+            <!-- Botón de Eliminar de la boleta -->
+            <td style="padding: 10px 0; text-align: right;">
+              <button (click)="eliminar(item.producto.id)" style="background: none; border: none; cursor: pointer; font-size: 15px; color: #999; transition: color 0.2s;" onmouseover="this.style.color='#e50046'" onmouseout="this.style.color='#999'" title="Eliminar producto">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- Desglose de impuestos financieros -->
+      <div style="text-align: right; margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px; color: #555;">
+        <p style="margin: 5px 0; font-size: 14px;">Subtotal: <span style="display: inline-block; width: 100px;">S/ {{ subtotal | number:'1.2-2' }}</span></p>
+        <p style="margin: 5px 0; font-size: 14px;">IGV (18%): <span style="display: inline-block; width: 100px;">S/ {{ igv | number:'1.2-2' }}</span></p>
+        <h2 style="margin: 15px 0 0 0; color: #e50046; font-size: 24px;">Total: <span style="display: inline-block; width: 100px;">S/ {{ cartService.getTotal() | number:'1.2-2' }}</span></h2>
+      </div>
+    </div>
+    
+    <!-- Botón de confirmación e impresión -->
+    <button (click)="imprimirBoleta()" style="margin-top: 30px; padding: 15px 30px; background: #28a745; color: white; border: none; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 5px; transition: background 0.3s; box-shadow: 0 4px 6px rgba(40,167,69,0.3);">
+      🖨️ CONFIRMAR COMPRA E IMPRIMIR BOLETA
+    </button>
+
+    <!-- Logos de Pasarelas de Pago -->
+    <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center; align-items: center; filter: grayscale(100%); opacity: 0.6;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" height="15" alt="Visa">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" height="20" alt="Mastercard">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Yape_text_logo.svg/2560px-Yape_text_logo.svg.png" height="20" alt="Yape">
+      <img src="https://seeklogo.com/images/P/plin-logo-303E4CBE5F-seeklogo.com.png" height="20" alt="Plin">
+    </div>
+  </div>
+</div>

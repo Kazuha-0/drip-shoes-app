@@ -1,33 +1,20 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { ProductService, Product } from '../../services/product.service';
-import { FormsModule } from '@angular/forms';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Product } from '../../services/product.service';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [FormsModule],
-  templateUrl: './product-list.component.html'
+  imports: [CommonModule],
+  templateUrl: './product-list.component.html',
+  styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit {
-  productService = inject(ProductService);
-  productos: Product[] = [];
-  nuevoZapato: Product = { nombre: '', marca: '', precio: 0 };
+export class ProductListComponent {
+  // @Input: Recibe la lista de zapatillas desde el componente Padre (Dashboard)
+  @Input() productos: Product[] = [];
 
-  ngOnInit() {
-    this.cargarProductos();
-  }
-
-  cargarProductos() {
-    this.productService.getProductos().subscribe({
-      next: (data) => this.productos = data,
-      error: (err) => console.error('Error al cargar datos:', err)
-    });
-  }
-
-  agregarZapato() {
-    this.productService.crearProducto(this.nuevoZapato).subscribe(() => {
-      this.cargarProductos();
-      this.nuevoZapato = { nombre: '', marca: '', precio: 0 };
-    });
-  }
+  // @Output: Emite eventos hacia el componente Padre cuando se hace clic en los botones
+  @Output() editar = new EventEmitter<Product>();
+  @Output() borrar = new EventEmitter<any>();
+  @Output() cambiarEstado = new EventEmitter<Product>();
 }

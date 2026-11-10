@@ -5,13 +5,14 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Product } from '../../services/product.service';
 import { AdminService } from '../../services/admin.service';
+import { ProductListComponent } from '../../components/product-list/product-list.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule , ProductListComponent],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
   private http = inject(HttpClient);

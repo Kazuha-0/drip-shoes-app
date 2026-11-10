@@ -6,33 +6,64 @@
     <button (click)="logout()" style="padding: 8px 15px; background-color: #333; color: white; border: none; cursor: pointer;">Cerrar Sesión</button>
   </div>
 
-  <!-- FORMULARIO DE PRODUCTO -->
+  
+<!-- FORMULARIO DE PRODUCTO CON VALIDACIONES DE ANGULAR -->
   <div class="form-card" style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
     <h3>{{ isEditing ? 'Editar Producto' : 'Nuevo Producto' }}</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-      <input type="text" [(ngModel)]="currentProduct.marca" placeholder="Marca (ej. Nike)" style="padding: 8px;">
-      <input type="text" [(ngModel)]="currentProduct.nombre" placeholder="Nombre (ej. Air Force 1)" style="padding: 8px;">
-      <input type="number" [(ngModel)]="currentProduct.precio" placeholder="Precio (S/)" style="padding: 8px;">
-      <select [(ngModel)]="currentProduct.categoria" style="padding: 8px;">
-        <option value="">Selecciona Categoría</option>
-        <option value="caballeros">Caballeros</option>
-        <option value="damas">Damas</option>
-        <option value="infantil">Infantil</option>
-      </select>
-      <input type="text" [(ngModel)]="currentProduct.descripcion" placeholder="Descripción breve" style="padding: 8px; grid-column: span 2;">
-      <div style="grid-column: span 2;">
-        <label>Imagen Local:</label>
-        <input type="file" id="fileUpload" (change)="onFileSelected($event)" accept="image/*" style="display: block; margin-top: 5px;">
+    
+    <!-- La etiqueta form envuelve los inputs y maneja el estado general con #productoForm -->
+    <form #productoForm="ngForm" (ngSubmit)="saveProduct()">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        
+        <!-- Marca (Obligatorio) -->
+        <div>
+          <input type="text" name="marca" [(ngModel)]="currentProduct.marca" #marca="ngModel" required placeholder="Marca (ej. Nike)" style="padding: 8px; width: 100%; box-sizing: border-box;">
+          <small *ngIf="marca.invalid && marca.touched" style="color: red; display: block; margin-top: 5px;">La marca es obligatoria.</small>
+        </div>
+
+        <!-- Nombre (Obligatorio) -->
+        <div>
+          <input type="text" name="nombre" [(ngModel)]="currentProduct.nombre" #nombre="ngModel" required placeholder="Nombre (ej. Air Force 1)" style="padding: 8px; width: 100%; box-sizing: border-box;">
+          <small *ngIf="nombre.invalid && nombre.touched" style="color: red; display: block; margin-top: 5px;">El nombre es obligatorio.</small>
+        </div>
+
+        <!-- Precio (Obligatorio y mayor a 0) -->
+        <div>
+          <input type="number" name="precio" [(ngModel)]="currentProduct.precio" #precio="ngModel" required min="1" placeholder="Precio (S/)" style="padding: 8px; width: 100%; box-sizing: border-box;">
+          <small *ngIf="precio.invalid && precio.touched" style="color: red; display: block; margin-top: 5px;">Ingresa un precio válido mayor a 0.</small>
+        </div>
+
+        <!-- Categoría (Obligatorio) -->
+        <div>
+          <select name="categoria" [(ngModel)]="currentProduct.categoria" #categoria="ngModel" required style="padding: 8px; width: 100%; box-sizing: border-box;">
+            <option value="">Selecciona Categoría</option>
+            <option value="caballeros">Caballeros</option>
+            <option value="damas">Damas</option>
+            <option value="infantil">Infantil</option>
+          </select>
+          <small *ngIf="categoria.invalid && categoria.touched" style="color: red; display: block; margin-top: 5px;">Selecciona una categoría.</small>
+        </div>
+
+        <div style="grid-column: span 2;">
+          <input type="text" name="descripcion" [(ngModel)]="currentProduct.descripcion" placeholder="Descripción breve" style="padding: 8px; width: 100%; box-sizing: border-box;">
+        </div>
+        
+        <div style="grid-column: span 2;">
+          <label>Imagen Local:</label>
+          <input type="file" id="fileUpload" (change)="onFileSelected($event)" accept="image/*" style="display: block; margin-top: 5px;">
+        </div>
       </div>
-    </div>
-    <div style="margin-top: 15px; display: flex; gap: 10px;">
-      <button (click)="saveProduct()" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer;">
-        {{ isEditing ? 'Actualizar' : 'Guardar' }}
-      </button>
-      <button *ngIf="isEditing" (click)="resetForm()" style="padding: 10px 20px; background-color: #6c757d; color: white; border: none; cursor: pointer;">
-        Cancelar
-      </button>
-    </div>
+
+      <div style="margin-top: 15px; display: flex; gap: 10px;">
+        <!-- El botón se deshabilita y se pone transparente si el formulario es inválido -->
+        <button type="submit" [disabled]="productoForm.invalid" [style.opacity]="productoForm.invalid ? '0.5' : '1'" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px;">
+          {{ isEditing ? 'Actualizar' : 'Guardar' }}
+        </button>
+        <button type="button" *ngIf="isEditing" (click)="resetForm(); productoForm.resetForm()" style="padding: 10px 20px; background-color: #6c757d; color: white; border: none; cursor: pointer; border-radius: 4px;">
+          Cancelar
+        </button>
+      </div>
+    </form>
   </div>
 
   <!-- BARRA DE BÚSQUEDA Y TABLA -->
@@ -46,47 +77,11 @@
     >
   </div>
 
-  <table style="width: 100%; border-collapse: collapse; text-align: left;">
-    <thead>
-      <tr style="border-bottom: 2px solid #ccc;">
-        <th style="padding: 10px;">Imagen</th>
-        <th style="padding: 10px;">Marca</th>
-        <th style="padding: 10px;">Nombre</th>
-        <th style="padding: 10px;">Categoría</th>
-        <th style="padding: 10px;">Precio</th>
-        <th style="padding: 10px;">Estado</th>
-        <th style="padding: 10px;">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let p of products" style="border-bottom: 1px solid #eee;">
-        <td style="padding: 10px;">
-          <img [src]="p.imagen" alt="Img" width="50" style="border-radius: 4px;" *ngIf="p.imagen">
-        </td>
-        <td style="padding: 10px;">{{ p.marca }}</td>
-        <td style="padding: 10px;">{{ p.nombre }}</td>
-        <td style="padding: 10px;">{{ p.categoria }}</td>
-        <td style="padding: 10px;">S/ {{ p.precio }}</td>
-        <td style="padding: 10px;">
-          <span [style.color]="p.visible ? 'green' : 'red'">
-            {{ p.visible ? 'Público' : 'Oculto' }}
-          </span>
-        </td>
-        <td style="padding: 10px; display: flex; gap: 5px; align-items: center; height: 100%;">
-          <button (click)="toggleVisibility(p)" style="padding: 5px 10px; background-color: #fd7e14; color: white; border: none; border-radius: 3px; cursor: pointer;">
-            {{ p.visible ? 'Ocultar' : 'Mostrar' }}
-          </button>
-          <button (click)="editProduct(p)" style="padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;">
-            Editar
-          </button>
-          <button (click)="deleteProduct(p.id)" style="padding: 5px 10px; background-color: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;">
-            Borrar
-          </button>
-        </td>
-      </tr>
-      <tr *ngIf="products.length === 0">
-        <td colspan="7" style="text-align: center; padding: 20px;">No se encontraron productos.</td>
-      </tr>
-    </tbody>
-  </table>
+ <!-- COMUNICACIÓN ENTRE COMPONENTES (@Input y @Output) -->
+<app-product-list 
+  [productos]="products" 
+  (cambiarEstado)="toggleVisibility($event)" 
+  (editar)="editProduct($event)" 
+  (borrar)="deleteProduct($event)">
+</app-product-list>
 </div>
