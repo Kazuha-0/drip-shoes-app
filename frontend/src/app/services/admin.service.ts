@@ -70,7 +70,7 @@ export class AdminService {
     return !!localStorage.getItem('jwt_token');
   }
 
-  // --- CRUD DE PRODUCTOS EXISTENTE ---
+  // --- CRUD DE PRODUCTOS ---
   getProducts() {
     return JSON.parse(localStorage.getItem(this.storageKey) || '[]');
   }

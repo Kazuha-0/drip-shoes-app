@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core'; // 1. Importa OnInit
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../services/admin.service';
@@ -11,15 +11,13 @@ import { CommonModule } from '@angular/common';
   templateUrl: './admin-login.component.html',
   styleUrls: ['./admin-login.component.css']
 })
-export class AdminLoginComponent {
-  isRegisterMode = false; // Controla si se muestra Sign in o Register
+export class AdminLoginComponent implements OnInit { // 2. Implementa OnInit
+  isRegisterMode = false;
 
-  // Variables para Login
   username = '';
   password = '';
   rememberMe = true;
 
-  // Variables para Registro (columnas de la tabla 'usuarios' en Supabase)
   regData = {
     nombre: '',
     apellido: '',
@@ -34,6 +32,13 @@ export class AdminLoginComponent {
 
   constructor(private adminService: AdminService, private router: Router) {}
 
+  // 3. Agrega esto: Si ya hay sesión activa, redirige al dashboard de inmediato
+  ngOnInit() {
+    if (this.adminService.isLoggedIn() && this.adminService.isAdmin()) {
+      this.router.navigate(['/dashboard']);
+    }
+  }
+
   toggleMode() {
     this.isRegisterMode = !this.isRegisterMode;
     this.errorMessage = '';
@@ -46,7 +51,6 @@ export class AdminLoginComponent {
 
     this.adminService.login(this.username, this.password).subscribe({
       next: (res) => {
-        // Si es ROLE_ADMIN va al dashboard; si es ROLE_USUARIO va al inicio del catálogo
         if (res.roles && res.roles.includes('ROLE_ADMIN')) {
           this.router.navigate(['/dashboard']);
         } else {
