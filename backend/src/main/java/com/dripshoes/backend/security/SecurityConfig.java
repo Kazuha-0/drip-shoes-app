@@ -34,10 +34,13 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // 1. Rutas públicas: Login, Registro, Actualizar Perfil y ver Catálogo
+                // 1. Rutas públicas: Login, Registro y Catálogo
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
                 
+                // Excepción específica para permitir cambiar visibilidad sin restricciones de rol en local
+                .requestMatchers(HttpMethod.PUT, "/api/productos/*/toggle").permitAll()
+
                 // 2. Rutas protegidas por Rol: Solo ROLE_ADMIN modifica productos
                 .requestMatchers(HttpMethod.POST, "/api/productos/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasAuthority("ROLE_ADMIN")

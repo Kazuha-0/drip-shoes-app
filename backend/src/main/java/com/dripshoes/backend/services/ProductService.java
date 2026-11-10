@@ -33,10 +33,22 @@ public class ProductService {
     }
 
     public List<Product> obtenerPorCategoria(String categoria) {
-   return productRepository.findVisibleByCategoryJPQL(categoria);
-}
-public List<Product> buscarZapatillas(String termino) {
+        return productRepository.findVisibleByCategoryJPQL(categoria);
+    }
+
+    public List<Product> buscarZapatillas(String termino) {
         return productRepository.buscarPorNombreOMarcaJPQL(termino);
     }
 
+    // --- NUEVO MÉTODO PARA CAMBIAR LA VISIBILIDAD (OCULTAR / MOSTRAR) ---
+    public Product toggleVisibilidad(Long id) {
+        Product producto = productRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
+        
+        // Asumiendo que tu atributo de visibilidad es booleano (ej: activo, visible, etc.)
+        // Si tu variable se llama diferente (ej: visible), cámbiala aquí:
+        producto.setVisible(!producto.getVisible());
+        
+        return productRepository.save(producto);
+    }
 }
