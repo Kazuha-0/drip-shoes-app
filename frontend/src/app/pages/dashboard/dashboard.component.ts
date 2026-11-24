@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +19,7 @@ export class DashboardComponent implements OnInit {
   private http = inject(HttpClient);
   private adminService = inject(AdminService);
   private router = inject(Router);
-  private apiUrl = 'http://localhost:8080/api/productos';
+  private apiUrl = `${environment.apiUrl}/productos`;
 
   products: Product[] = [];
   currentProduct: Product = { id: 0, marca: '', nombre: '', precio: 0, categoria: '', descripcion: '', imagen: '', visible: true };

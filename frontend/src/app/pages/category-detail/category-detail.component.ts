@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -52,7 +53,7 @@ export class CategoryDetailComponent implements OnInit {
   }
 
   cargarProductos(tipo: string) {
-    this.http.get<Product[]>(`http://localhost:8080/api/productos?categoria=${tipo}`).subscribe({
+    this.http.get<Product[]>(`${environment.apiUrl}/productos?categoria=${tipo}`).subscribe({
       // AQUÍ ESTÁ EL FILTRO: Solo guardamos los productos que NO tengan visible en false
       next: (data) => this.productos = data.filter((producto: any) => producto.visible !== false),
       error: (err) => console.error('Error al filtrar productos:', err)

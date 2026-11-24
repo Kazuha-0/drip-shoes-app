@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
@@ -7,7 +8,7 @@ import { Observable, tap } from 'rxjs';
 })
 export class AdminService {
   private http = inject(HttpClient);
-  private authUrl = 'http://localhost:8080/api/auth';
+  private authUrl = `${environment.apiUrl}/auth`;
   private storageKey = 'drip_shoes_products';
 
   constructor() {}
