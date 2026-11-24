@@ -18,6 +18,7 @@ public class Product {
     // Nuevos campos solicitados
     private String descripcion;
     private String categoria; // "Caballeros", "Damas" o "Infantil"
+    @Column(columnDefinition = "TEXT")
     private String imagen;    // URL de la imagen del producto
 
     // NUEVO CAMPO: Para ocultar/mostrar productos desde el Dashboard
